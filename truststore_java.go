@@ -11,6 +11,7 @@ import (
 	"crypto/x509"
 	"encoding/hex"
 	"hash"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -34,14 +35,21 @@ func init() {
 	} else {
 		keytoolPath = filepath.Join("bin", "keytool")
 	}
+	
+	*javaHomeState = (os.Getenv("JAVA_HOME") != "") ? "✅" : "❌";
+
 
 	if v := os.Getenv("JAVA_HOME"); v != "" {
 		hasJava = true
 		javaHome = v
+		log.Printf("\nJAVA_HOME: \"%s\" ✅\n\n", os.Getenv("JAVA_HOME"))
 
 		if pathExists(filepath.Join(v, keytoolPath)) {
 			hasKeytool = true
 			keytoolPath = filepath.Join(v, keytoolPath)
+			log.Printf("\nKEYTOOL: \"%s\" ✅\n\n", keytoolPath)
+		} else {
+			log.Printf("\nKEYTOOL: \"%s\" ❌\n\n", keytoolPath)
 		}
 
 		if pathExists(filepath.Join(v, "lib", "security", "cacerts")) {
@@ -51,6 +59,14 @@ func init() {
 		if pathExists(filepath.Join(v, "jre", "lib", "security", "cacerts")) {
 			cacertsPath = filepath.Join(v, "jre", "lib", "security", "cacerts")
 		}
+		
+		if (cacertsPath == "") {
+			log.Printf("\nCACERTS: \"%s\" ❌\n\n", cacertsPath)
+		} else {
+			log.Printf("\nCACERTS: \"%s\" ✅\n\n", cacertsPath)
+		}
+	} else {
+		log.Printf("\nJAVA_HOME: \"%s\" ❌\n\n", os.Getenv("JAVA_HOME"))
 	}
 }
 
